@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Football Drive Simulator | Ethan Thomason</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: linear-gradient(180deg, #002E5D, #001B36);
+            color: #ffffff;
+        }
+
+        .container {
+            max-width: 820px;
+            margin: 60px auto;
+            padding: 30px;
+            background-color: rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: #e5e7eb;
+        }
+
+        .field {
+            margin: 20px 0;
+            padding: 16px;
+            background-color: #0057B8;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .stats {
+            margin-top: 10px;
+            font-size: 1em;
+            color: #f1f5f9;
+        }
+
+        .buttons {
+            margin-top: 25px;
+        }
+
+        button {
+            padding: 12px 18px;
+            margin: 6px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1em;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .run {
+            background-color: #ffffff;
+            color: #002E5D;
+        }
+
+        .short {
+            background-color: #93c5fd;
+            color: #002E5D;
+        }
+
+        .deep {
+            background-color: #fca5a5;
+            color: #450a0a;
+        }
+
+        .reset {
+            background-color: #9ca3af;
+            color: #111827;
+        }
+
+        .message {
+            margin-top: 20px;
+            font-size: 1.1em;
+        }
+
+        a {
+            color: #93c5fd;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 25px;
+            font-weight: bold;
+        }
+
+        /* Touchdown celebration */
+        .celebration {
+            margin-top: 30px;
+            animation: fadeIn 0.8s ease-in-out;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .cosmo {
+            width: 180px;
+            margin-top: 15px;
+            animation: dance 1s infinite alternate ease-in-out;
+        }
+
+        @keyframes dance {
+            0% { transform: rotate(-8deg) scale(1); }
+            50% { transform: rotate(8deg) scale(1.05); }
+            100% { transform: rotate(-8deg) scale(1); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🏈 Football Drive Simulator</h1>
+    <p>
+        You have <strong>4 chances for each first down</strong> — drive to the
+        <strong>end zone</strong> and score a touchdown!
+    </p>
+
+    <div class="field" id="field">
+        Ball on your own 25-yard line
+    </div>
+
+    <div class="stats" id="stats">
+        Down: 1 | Yards to go: 10
+    </div>
+
+    <div class="buttons">
+        <button class="run" onclick="runPlay()">Run</button>
+        <button class="short" onclick="shortPass()">Short Pass</button>
+        <button class="deep" onclick="deepPass()">Deep Pass</button>
+        <button class="reset" onclick="resetGame()">Reset Drive</button>
+    </div>
+
+    <div class="message" id="message">
+        Choose your first play.
+    </div>
+
+    <!-- Touchdown Celebration -->
+    <div id="celebration" class="celebration hidden">
+        <h2>🏆 TOUCHDOWN COUGARS! 🏆</h2>
+        
+        <img
+src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExMzZmZXU0cXBwN3lnMjY4ems4eTJoeG1uMWhibHdrN3U3Y2lsdmxieiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3ov9k1SWkzOxBFpXMc/giphy.gif"
+  alt="Cosmo the Cougar Dancing"
+  class="cosmo">
+    </div>
+
+    <a href="scratch.html">← Back to Scratch Page</a>
+</div>
+
+<script>
+    let ballPosition;
+    let down;
+    let yardsToGo;
+    let gameOver;
+
+    function startGame() {
+        ballPosition = 25;
+        down = 1;
+        yardsToGo = 10;
+        gameOver = false;
+        document.getElementById("celebration").classList.add("hidden");
+        updateDisplay("Choose your first play.");
+    }
+
+    function updateDisplay(msg) {
+        document.getElementById("field").textContent =
+            `Ball on your ${ballPosition}-yard line`;
+        document.getElementById("stats").textContent =
+            `Down: ${down} | Yards to go: ${yardsToGo}`;
+        document.getElementById("message").textContent = msg;
+    }
+
+    function endGame(msg) {
+        gameOver = true;
+        document.getElementById("message").textContent = msg;
+    }
+
+    function gainYards(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function checkResult(yards) {
+        ballPosition += yards;
+
+        if (ballPosition >= 100) {
+            document.getElementById("celebration").classList.remove("hidden");
+            endGame("🏆 TOUCHDOWN COUGARS! 🐾");
+            return;
+        }
+
+        if (yards >= yardsToGo) {
+            down = 1;
+            yardsToGo = 10;
+            updateDisplay("And that's another Cougar… FIRST DOWN! 🐾 *cougar growl*");
+        } else {
+            yardsToGo -= yards;
+            down++;
+
+            if (down > 4) {
+                endGame("❌ Turnover on downs. Drive over.");
+            } else {
+                updateDisplay(`Gained ${yards} yards.`);
+            }
+        }
+    }
+
+    function runPlay() {
+        if (gameOver) return;
+        let yards = gainYards(-2, 6);
+        checkResult(yards);
+    }
+
+    function shortPass() {
+        if (gameOver) return;
+        let yards = gainYards(0, 12);
+        checkResult(yards);
+    }
+
+    function deepPass() {
+        if (gameOver) return;
+        let outcome = Math.random();
+        if (outcome < 0.4) {
+            endGame("❌ Interception! Drive over.");
+        } else {
+            let yards = gainYards(10, 40);
+            checkResult(yards);
+        }
+    }
+
+    function resetGame() {
+        startGame();
+    }
+
+    startGame();
+</script>
+
+</body>
+</html>
